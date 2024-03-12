@@ -41,6 +41,12 @@ jobs:
         env:
           TF_LOG: DEBUG
 
+      - name: Terraform Refresh
+        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        run: terraform refresh
+        env:
+          TF_LOG: DEBUG
+
       - name: Terraform Apply
         if: ${{ startsWith(github.ref, 'refs/heads/main') }}
         run: terraform apply -auto-approve
