@@ -13,6 +13,7 @@ resource "aws_eks_cluster" "lanchonete_filura_cluster" {
 
   tags = {
     Environment = "test"
+    prod = "true"
   }
 }
 
