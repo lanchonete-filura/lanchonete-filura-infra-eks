@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_eks_cluster" "lanchonete_filura_cluster" {
   name     = "lanchonete_filura_cluster"
-  role_arn = aws_iam_role.lanchonete_filura_cluster_role.arn
+  role_arn = aws_iam_role.lanchonete_filura_cluster_role-resource.arn
 
   vpc_config {
     subnet_ids         = var.subnet_ids
@@ -17,8 +17,8 @@ resource "aws_eks_cluster" "lanchonete_filura_cluster" {
   }
 }
 
-resource "aws_iam_role" "lanchonete_filura_cluster_role" {
-  name = "lanchonete_filura_cluster_role"
+resource "aws_iam_role" "lanchonete_filura_cluster_role-resource" {
+  name = "lanchonete_filura_cluster_role-resource"
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [{
@@ -34,7 +34,7 @@ resource "aws_iam_role" "lanchonete_filura_cluster_role" {
 resource "aws_eks_node_group" "lanchonete_filura_cluster_nodes" {
   cluster_name    = aws_eks_cluster.lanchonete_filura_cluster.name
   node_group_name = "lanchonete_filura_cluster_nodes"
-  node_role_arn   = aws_iam_role.lanchonete_filura_cluster_role.arn
+  node_role_arn   = aws_iam_role.lanchonete_filura_cluster_role-resource.arn
 
   subnet_ids = var.subnet_ids
 
@@ -49,8 +49,8 @@ resource "aws_eks_node_group" "lanchonete_filura_cluster_nodes" {
   }
 }
 
-resource "aws_iam_role" "lanchonete_filura_node_group_role" {
-  name = "lanchonete_filura_node_group_role"
+resource "aws_iam_role" "lanchonete_filura_node_group_role-resource" {
+  name = "lanchonete_filura_node_group_role-resource"
   assume_role_policy = jsonencode({
     "Version" = "2012-10-17",
     "Statement" = [{
@@ -66,7 +66,7 @@ resource "aws_iam_role" "lanchonete_filura_node_group_role" {
 resource "aws_eks_fargate_profile" "lanchonete_filura_fargate_profile" {
   cluster_name           = aws_eks_cluster.lanchonete_filura_cluster.name
   fargate_profile_name   = "lanchonete_filura_fargate_profile"
-  pod_execution_role_arn = aws_iam_role.lanchonete_filura_fargate_profile_role.arn
+  pod_execution_role_arn = aws_iam_role.lanchonete_filura_fargate_profile_role-resource.arn
   subnet_ids             = var.subnet_ids
 
   selector {
@@ -74,8 +74,8 @@ resource "aws_eks_fargate_profile" "lanchonete_filura_fargate_profile" {
   }
 }
 
-resource "aws_iam_role" "lanchonete_filura_fargate_profile_role" {
-  name = "eks-fargate-profile-example"
+resource "aws_iam_role" "lanchonete_filura_fargate_profile_role-resource" {
+  name = "lanchonete_filura_fargate_profile_role-resource"
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -89,7 +89,7 @@ resource "aws_iam_role" "lanchonete_filura_fargate_profile_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "example-AmazonEKSFargatePodExecutionRolePolicy" {
+resource "aws_iam_role_policy_attachment" "lanchonete-filura-AmazonEKSFargatePodExecutionRolePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
-  role       = aws_iam_role.lanchonete_filura_fargate_profile_role.name
+  role       = aws_iam_role.lanchonete_filura_fargate_profile_role-resource.name
 }
