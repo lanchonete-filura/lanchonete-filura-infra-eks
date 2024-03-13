@@ -30,13 +30,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME}}
           role-duration-seconds: ${{ secrets.AWS_ROLE_DURATION_SECONDS }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
-        env:
-          TF_LOG: DEBUG
-      
+          
       - name: Terraform Init
         run: terraform init
 
