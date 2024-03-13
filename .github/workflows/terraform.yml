@@ -38,6 +38,11 @@ jobs:
         id: validate
         run: terraform validate
 
+      - name: Terraform Plan with refresh
+        if: github.event_name == 'pull_request'
+        id: plan_refresh
+        run: terraform plan -refresh only
+
       - name: Terraform Plan
         if: github.event_name == 'pull_request'
         run: terraform plan
