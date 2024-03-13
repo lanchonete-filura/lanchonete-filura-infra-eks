@@ -49,9 +49,11 @@ resource "aws_eks_node_group" "lanchonete_filura_cluster_nodes" {
 
   subnet_ids = var.subnet_ids
 
+  instance_types = ["t3.small"]
+
   scaling_config {
-    desired_size = 2
-    max_size     = 5
+    desired_size = 1
+    max_size     = 2
     min_size     = 1
   }
 
