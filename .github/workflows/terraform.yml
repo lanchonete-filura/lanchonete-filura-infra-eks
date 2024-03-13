@@ -2,6 +2,9 @@ name: Terraform
 
 on:
   push:
+    branches: 
+      - main
+  pull_request:
 
 permissions:
   id-token: write # obrigatório para usar autenticação OIDC
@@ -20,13 +23,17 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.1.0
-      
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME}}
           role-duration-seconds: ${{ secrets.AWS_ROLE_DURATION_SECONDS }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
       
       - name: Terraform Init
         run: terraform init
@@ -35,20 +42,8 @@ jobs:
         id: validate
         run: terraform validate
 
-      - name: Terraform Refresh
-        if: ${{ startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main') }}
-        run: terraform refresh
-        env:
-          TF_LOG: DEBUG
-
-      - name: Terraform State List
-        if: ${{ startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main') }}
-        run: terraform state list
-        env:
-          TF_LOG: DEBUG
-
       - name: Terraform Plan
-        if: ${{ startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main') }}
+        if: github.event_name == 'pull_request'
         run: terraform plan
         env:
           TF_LOG: DEBUG
@@ -59,34 +54,40 @@ jobs:
         env:
           TF_LOG: DEBUG
 
-  create-pull-request:
-    runs-on: ubuntu-latest
-    needs: terraform
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set Branch Name
-        id: branch_name
-        run: echo "BRANCH_NAME=$(echo $GITHUB_REF)" >> $GITHUB_ENV
-
-      - name: Create Pull Request Develop
-        if: ${{ success() &&  startsWith(github.ref, 'refs/heads/feature/')}}
-        uses: peter-evans/create-pull-request@v6
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
         with:
-          title: PR criado automaticamente
-          body: Caso seu build de feature for realizado com sucesso, você poderá seguir para o planejamento de sua infra na develop
-          base: develop
-          branch: ${{ env.BRANCH_NAME }}
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-      - name: Create Pull Request Main
-        if: ${{ success() &&  startsWith(github.ref, 'refs/heads/develop')}}
-        uses: peter-evans/create-pull-request@v6
-        with:
-          title: PR criado automaticamente
-          body: Caso seu build de feature for realizado com sucesso, você poderá seguir para o planejamento de sua infra na develop
-          base: main
-          branch: ${{ env.BRANCH_NAME }}
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+            <details><summary>Show Plan</summary>
+
+            \`\`\`terraform\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
