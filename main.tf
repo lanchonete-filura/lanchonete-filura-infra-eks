@@ -45,7 +45,7 @@ resource "aws_iam_role" "lanchonete_filura_cluster_role-resource" {
 resource "aws_eks_node_group" "lanchonete_filura_cluster_nodes" {
   cluster_name    = aws_eks_cluster.lanchonete_filura_cluster.name
   node_group_name = "lanchonete_filura_cluster_nodes"
-  node_role_arn   = aws_iam_role.lanchonete_filura_cluster_role-resource.arn
+  node_role_arn   = aws_iam_role.lanchonete_filura_node_group_role-resource.arn
 
   subnet_ids = var.subnet_ids
 
