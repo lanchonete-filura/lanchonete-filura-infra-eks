@@ -35,15 +35,21 @@ jobs:
         id: validate
         run: terraform validate
 
-      - name: Terraform Plan
+      - name: Terraform Refresh
         if: ${{ startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main') }}
-        run: terraform plan
+        run: terraform refresh
         env:
           TF_LOG: DEBUG
 
-      - name: Terraform Refresh
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
-        run: terraform refresh
+      - name: Terraform State List
+        if: ${{ startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main') }}
+        run: terraform state list
+        env:
+          TF_LOG: DEBUG
+
+      - name: Terraform Plan
+        if: ${{ startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main') }}
+        run: terraform plan
         env:
           TF_LOG: DEBUG
 
