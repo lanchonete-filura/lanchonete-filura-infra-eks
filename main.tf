@@ -35,7 +35,7 @@ resource "aws_iam_role" "lanchonete_filura_cluster_role-resource" {
     "Statement" = [{
       "Effect" = "Allow",
       "Principal" = {
-        "Service" = "ec2.amazonaws.com"
+        "Service" = "eks.amazonaws.com"
       },
       "Action" = "sts:AssumeRole"
     }]
