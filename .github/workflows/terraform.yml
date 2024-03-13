@@ -42,10 +42,6 @@ jobs:
         if: github.event_name == 'pull_request'
         id: plan_refresh
         run: terraform plan -refresh-only
-
-      - name: Terraform Plan
-        if: github.event_name == 'pull_request'
-        run: terraform plan
         env:
           TF_LOG: DEBUG
 
