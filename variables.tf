@@ -6,11 +6,11 @@ variable "aws_region" {
 variable "subnet_ids" {
   description = "List of subnet IDs where the EKS resources will be created"
   type        = list(string)
-  default     = ["subnet-0f78e4bde38e91494", "subnet-02b2e7bb4a58e380a"]
+  default     = ["subnet-0014a51e3d2b3c8e8"]
 }
 
 variable "security_group_ids" {
   description = "List of security group IDs for the EKS resources"
   type        = list(string)
-  default     = ["sg-011da02532863fa97"]
+  default     = ["sg-056ab5fe5d2762eb5"]
 }
